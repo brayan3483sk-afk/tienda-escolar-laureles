@@ -3,6 +3,7 @@ services:
     name: tienda-escolar-laureles
     runtime: python
     plan: free
+    region: oregon
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
     healthCheckPath: /health
@@ -17,24 +18,15 @@ services:
       - key: FLASK_ENV
         value: production
       - key: FLASK_DEBUG
-        value: 0
+        value: "0"
       - key: SECRET_KEY
         generateValue: true
       - key: SESSION_COOKIE_SECURE
-        value: true
+        value: "true"
       - key: AUTO_INIT_DB
-        value: true
-      - key: DB_HOST
+        value: "true"
+      # Conexión PostgreSQL de Render o MySQL externa (mysql://usuario:clave@host:3306/db)
+      - key: DATABASE_URL
         sync: false
-      - key: DB_PORT
-        value: 3306
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: DB_SSL
-        value: true
       - key: NGROK_URL
         sync: false
