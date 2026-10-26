@@ -1,4 +1,11 @@
-from database.conexion import fetch_one, fetch_all, execute_query, get_db_connection
+from database.conexion import (
+    IS_POSTGRES,
+    execute_query,
+    fetch_all,
+    fetch_one,
+    get_db_connection,
+    get_dict_cursor,
+)
 
 class Pedido:
     @staticmethod
@@ -27,15 +34,24 @@ class Pedido:
         if not connection:
             return False, "Error de conexión con la base de datos."
 
-        cursor = connection.cursor(dictionary=True)
+        cursor = get_dict_cursor(connection)
         try:
             # 2. Insertar pedido cabecera
-            query_pedido = """
-                INSERT INTO pedidos (id_usuario, fecha, total, metodo_pago, estado)
-                VALUES (%s, NOW(), %s, %s, 'PENDIENTE')
-            """
-            cursor.execute(query_pedido, (id_usuario, total_pedido, metodo_pago))
-            pedido_id = cursor.lastrowid
+            if IS_POSTGRES:
+                query_pedido = """
+                    INSERT INTO pedidos (id_usuario, fecha, total, metodo_pago, estado)
+                    VALUES (%s, NOW(), %s, %s, 'PENDIENTE')
+                    RETURNING id
+                """
+                cursor.execute(query_pedido, (id_usuario, total_pedido, metodo_pago))
+                pedido_id = cursor.fetchone()['id']
+            else:
+                query_pedido = """
+                    INSERT INTO pedidos (id_usuario, fecha, total, metodo_pago, estado)
+                    VALUES (%s, NOW(), %s, %s, 'PENDIENTE')
+                """
+                cursor.execute(query_pedido, (id_usuario, total_pedido, metodo_pago))
+                pedido_id = cursor.lastrowid
 
             # 3. Insertar detalles y descontar inventario
             for item in items_carrito:
@@ -82,10 +98,14 @@ class Pedido:
 
     @staticmethod
     def get_all_pedidos(filtro_estado=None):
-        query = """
+        if IS_POSTGRES:
+            descripcion_sql = "STRING_AGG(d.cantidad || 'x ' || pr.nombre, ', ')"
+        else:
+            descripcion_sql = "GROUP_CONCAT(CONCAT(d.cantidad, 'x ', pr.nombre) SEPARATOR ', ')"
+        query = f"""
             SELECT p.id, p.id_usuario, u.nombre AS usuario_nombre, u.usuario AS usuario_username,
                    p.fecha, p.total, p.metodo_pago, p.estado,
-                   GROUP_CONCAT(CONCAT(d.cantidad, 'x ', pr.nombre) SEPARATOR ', ') AS descripcion_productos
+                   {descripcion_sql} AS descripcion_productos
             FROM pedidos p
             INNER JOIN usuarios u ON p.id_usuario = u.id
             LEFT JOIN detalle_pedido d ON p.id = d.id_pedido
@@ -96,7 +116,10 @@ class Pedido:
             query += " WHERE p.estado = %s"
             params.append(filtro_estado)
         
-        query += " GROUP BY p.id ORDER BY p.fecha DESC"
+        query += (
+            " GROUP BY p.id, p.id_usuario, u.nombre, u.usuario, p.fecha, p.total, "
+            "p.metodo_pago, p.estado ORDER BY p.fecha DESC"
+        )
         return fetch_all(query, params)
 
     @staticmethod
