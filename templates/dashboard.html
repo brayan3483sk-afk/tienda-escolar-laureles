@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Control Admin{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold text-success mb-1"><i class="bi bi-speedometer2 me-2"></i>Panel de Administración</h2>
+      <p class="text-muted mb-0">Institución Educativa Distrital Los Laureles</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('inventario.gestion_inventario') }}" class="btn btn-laureles-primary rounded-pill">
+        <i class="bi bi-box-seam me-1"></i>Gestionar Inventario
+      </a>
+      <a href="{{ url_for('reportes.generar_reporte') }}" class="btn btn-laureles-accent rounded-pill">
+        <i class="bi bi-bar-chart-line-fill me-1"></i>Ver Reportes
+      </a>
+    </div>
+  </div>
+
+  <!-- TARJETAS DE MÉTRICAS KPI -->
+  <div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="kpi-card" style="border-left-color: #1b4332;">
+        <div class="kpi-icon kpi-icon-green"><i class="bi bi-currency-dollar"></i></div>
+        <div>
+          <span class="text-muted small fw-semibold">Ventas Totales</span>
+          <h4 class="fw-extrabold text-dark mb-0 currency-format">{{ total_ventas }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="kpi-card" style="border-left-color: #ffb703;">
+        <div class="kpi-icon kpi-icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+          <span class="text-muted small fw-semibold">Pedidos Pendientes</span>
+          <h4 class="fw-extrabold text-dark mb-0">{{ pedidos_pendientes }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="kpi-card" style="border-left-color: #0284c7;">
+        <div class="kpi-icon kpi-icon-blue"><i class="bi bi-box-seam-fill"></i></div>
+        <div>
+          <span class="text-muted small fw-semibold">Productos Activos</span>
+          <h4 class="fw-extrabold text-dark mb-0">{{ total_productos }}</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="kpi-card" style="border-left-color: #d90429;">
+        <div class="kpi-icon kpi-icon-red"><i class="bi bi-receipt"></i></div>
+        <div>
+          <span class="text-muted small fw-semibold">Total Pedidos</span>
+          <h4 class="fw-extrabold text-dark mb-0">{{ total_pedidos }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- ALERTAS DE STOCK BAJO -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-danger text-white py-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Alertas de Stock Bajo (&le; 5 u.)</h5>
+        </div>
+        <div class="card-body p-0">
+          {% if stock_bajo %}
+            <div class="list-group list-group-flush">
+              {% for p in stock_bajo %}
+                <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                  <div>
+                    <strong class="text-dark">{{ p.nombre }}</strong>
+                    <small class="d-block text-muted">{{ p.categoria_nombre }}</small>
+                  </div>
+                  <span class="badge bg-danger rounded-pill px-3 py-2 fs-6">{{ p.cantidad }} unid.</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="p-4 text-center text-success">
+              <i class="bi bi-check-circle-fill display-5 mb-2"></i>
+              <p class="mb-0 fw-semibold">¡Excelente! Todos los productos tienen stock suficiente.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ÚLTIMOS PEDIDOS REGISTRADOS -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Últimos Pedidos</h5>
+          <a href="{{ url_for('ventas.admin_pedidos') }}" class="btn btn-outline-light btn-sm rounded-pill">Ver Todos</a>
+        </div>
+        <div class="card-body p-0">
+          {% if ultimos_pedidos %}
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-success fw-bold">
+                  <tr>
+                    <th class="ps-3">ID</th>
+                    <th>Estudiante</th>
+                    <th>Total</th>
+                    <th>Pago</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for p in ultimos_pedidos %}
+                    <tr>
+                      <td class="ps-3 fw-bold">#{{ p.id }}</td>
+                      <td>{{ p.usuario_nombre }}</td>
+                      <td class="fw-bold currency-format">{{ p.total }}</td>
+                      <td><span class="badge bg-secondary">{{ p.metodo_pago }}</span></td>
+                      <td>
+                        {% if p.estado == 'PENDIENTE' %}
+                          <span class="badge bg-warning text-dark">PENDIENTE</span>
+                        {% elif p.estado == 'ENTREGADO' %}
+                          <span class="badge bg-success">ENTREGADO</span>
+                        {% else %}
+                          <span class="badge bg-danger">CANCELADO</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-4 text-center text-muted">No hay pedidos registrados aún.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

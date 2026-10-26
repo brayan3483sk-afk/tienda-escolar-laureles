@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Error Interno del Servidor (Error 500){% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="card border-0 shadow-lg rounded-4 p-5 mx-auto" style="max-width: 600px;">
+    <div class="display-1 text-warning fw-extrabold mb-3">500</div>
+    <h3 class="fw-bold text-dark mb-3">Error Interno del Servidor</h3>
+    <p class="text-muted mb-4">Ha ocurrido un problema inesperado en la aplicación. Asegúrese de que el servidor MySQL en XAMPP esté iniciado correctamente.</p>
+    <div>
+      <a href="{{ url_for('menu.index') }}" class="btn btn-laureles-primary btn-lg rounded-pill px-4">
+        <i class="bi bi-arrow-clockwise me-2"></i>Reintentar e Ir al Inicio
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+# Entorno
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+
+# Editores / Sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs y temporales
+*.log
+*.tmp
+*.bak
+
+# Archivos generados en tiempo de ejecución
+reports/*.png
+static/charts/*.png.tmp
+
+# Credenciales locales
+.secrets/

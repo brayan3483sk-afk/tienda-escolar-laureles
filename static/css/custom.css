@@ -1,0 +1,297 @@
+/* =============================================================================
+   ESTILOS INSTITUCIONALES - I.E.D. LOS LAURELES (TIENDA ESCOLAR VIRTUAL)
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --laureles-green: #1b4332;
+  --laureles-green-light: #2d6a4f;
+  --laureles-green-accent: #40916c;
+  --laureles-red: #d90429;
+  --laureles-yellow: #ffb703;
+  --laureles-yellow-hover: #faa307;
+  --laureles-bg: #f8f9fa;
+  --laureles-card-bg: #ffffff;
+  --laureles-text: #212529;
+  --laureles-shadow: 0 8px 30px rgba(27, 67, 50, 0.08);
+  --laureles-radius: 16px;
+}
+
+body {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--laureles-bg);
+  color: var(--laureles-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* -----------------------------------------------------------------------------
+   NAVBAR & HEADER INSTITUCIONAL
+   ----------------------------------------------------------------------------- */
+.navbar-laureles {
+  background: linear-gradient(135deg, var(--laureles-green) 0%, var(--laureles-green-light) 100%);
+  border-bottom: 4px solid var(--laureles-yellow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.brand-title {
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  color: var(--laureles-yellow);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link-custom {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link-custom:hover, .nav-link-custom.active {
+  color: var(--laureles-yellow) !important;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.badge-cart {
+  background-color: var(--laureles-red);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid white;
+}
+
+/* -----------------------------------------------------------------------------
+   TARJETAS Y CATÁLOGO
+   ----------------------------------------------------------------------------- */
+.card-producto {
+  border: none;
+  border-radius: var(--laureles-radius);
+  background: var(--laureles-card-bg);
+  box-shadow: var(--laureles-shadow);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-producto:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(27, 67, 50, 0.15);
+}
+
+.card-img-wrapper {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background-color: #f1f3f5;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card-producto:hover .card-img-top {
+  transform: scale(1.06);
+}
+
+.badge-categoria {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: rgba(27, 67, 50, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.badge-stock {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+.badge-stock-ok {
+  background-color: #d8f3dc;
+  color: #1b4332;
+}
+
+.badge-stock-low {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-stock-empty {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.precio-tag {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--laureles-green);
+}
+
+/* -----------------------------------------------------------------------------
+   BOTONES INSTITUCIONALES
+   ----------------------------------------------------------------------------- */
+.btn-laureles-primary {
+  background-color: var(--laureles-green);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.btn-laureles-primary:hover {
+  background-color: var(--laureles-green-light);
+  color: white;
+  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.25);
+}
+
+.btn-laureles-accent {
+  background-color: var(--laureles-yellow);
+  color: var(--laureles-green);
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.btn-laureles-accent:hover {
+  background-color: var(--laureles-yellow-hover);
+  color: var(--laureles-green);
+  box-shadow: 0 4px 12px rgba(255, 183, 3, 0.3);
+}
+
+.btn-laureles-danger {
+  background-color: var(--laureles-red);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.btn-laureles-danger:hover {
+  background-color: #b00020;
+  color: white;
+}
+
+/* -----------------------------------------------------------------------------
+   TARJETAS DASHBOARD KPI
+   ----------------------------------------------------------------------------- */
+.kpi-card {
+  border: none;
+  border-radius: var(--laureles-radius);
+  background: white;
+  box-shadow: var(--laureles-shadow);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  border-left: 5px solid var(--laureles-green);
+}
+
+.kpi-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.kpi-icon-green { background-color: #d8f3dc; color: var(--laureles-green); }
+.kpi-icon-yellow { background-color: #fefae0; color: #b5838d; }
+.kpi-icon-blue { background-color: #e0f2fe; color: #0284c7; }
+.kpi-icon-red { background-color: #ffe5ec; color: var(--laureles-red); }
+
+/* -----------------------------------------------------------------------------
+   FOOTER
+   ----------------------------------------------------------------------------- */
+footer {
+  background-color: var(--laureles-green);
+  color: rgba(255, 255, 255, 0.85);
+  border-top: 3px solid var(--laureles-yellow);
+}
+
+footer a {
+  color: var(--laureles-yellow);
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* -----------------------------------------------------------------------------
+   ESTILOS PARA IMPRESIÓN (REPORTES PDF)
+   ----------------------------------------------------------------------------- */
+@media print {
+  /* Ocultar elementos no deseados en impresión */
+  nav, footer, .btn, .d-print-none {
+    display: none !important;
+  }
+  
+  /* Ajustar contenedor y fondo */
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  .container, .container-fluid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Evitar cortes a la mitad de las tarjetas, filas y gráficos */
+  .card, .row > div, img {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Asegurar que los gráficos no se expandan demasiado y rompan el diseño */
+  .img-fluid {
+    max-height: 400px !important;
+    object-fit: contain;
+  }
+
+  /* Forzar colores de fondo para que los badges e infografías se vean bien al imprimir */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

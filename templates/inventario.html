@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold text-success mb-1"><i class="bi bi-box-seam me-2"></i>Gestión de Productos e Inventario</h2>
+      <p class="text-muted mb-0">Administración de catálogo, control de existencias y borrado lógico (Soft Delete)</p>
+    </div>
+    <button type="button" class="btn btn-laureles-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
+      <i class="bi bi-plus-circle-fill me-1"></i>Nuevo Producto
+    </button>
+  </div>
+
+  <!-- TABLA DE PRODUCTOS EN INVENTARIO -->
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+    <div class="card-header bg-success text-white py-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-list-stars me-2"></i>Catálogo de Productos</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-success fw-bold">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th class="text-center pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in productos %}
+              <tr class="{% if p.estado == 'Inactivo' %}table-secondary opacity-75{% endif %}">
+                <td class="ps-4 fw-bold">#{{ p.id }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <img src="{{ url_for('static', filename='img/productos/' + p.imagen) }}" 
+                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&q=80';"
+                         alt="{{ p.nombre }}" class="rounded-3" width="44" height="44" style="object-fit: cover;">
+                    <strong class="text-dark">{{ p.nombre }}</strong>
+                  </div>
+                </td>
+                <td><span class="badge bg-light text-dark border">{{ p.categoria_nombre }}</span></td>
+                <td class="fw-bold currency-format">{{ p.precio }}</td>
+                <td>
+                  {% if p.cantidad <= 5 %}
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold"><i class="bi bi-exclamation-circle me-1"></i>{{ p.cantidad }} u.</span>
+                  {% else %}
+                    <span class="badge bg-success px-3 py-2 fw-bold">{{ p.cantidad }} u.</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if p.estado == 'Activo' %}
+                    <span class="badge bg-success">Activo</span>
+                  {% else %}
+                    <span class="badge bg-danger">Inactivo (Borrado)</span>
+                  {% endif %}
+                </td>
+                <td class="text-center pe-4">
+                  <div class="btn-group">
+                    <!-- BOTÓN EDITAR -->
+                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                            onclick="cargarModalEditar({{ p | tojson | forceescape }})"
+                            title="Editar Producto">
+                      <i class="bi bi-pencil-fill"></i>
+                    </button>
+
+                    <!-- BOTÓN AJUSTE DE STOCK -->
+                    <button type="button" class="btn btn-outline-warning btn-sm" 
+                            onclick="cargarModalAjuste({{ p.id }}, '{{ p.nombre }}', {{ p.cantidad }})"
+                            title="Ajustar Stock">
+                      <i class="bi bi-arrow-down-up"></i>
+                    </button>
+
+                    <!-- BORRADO LÓGICO / REACTIVAR -->
+                    {% if p.estado == 'Activo' %}
+                      <form action="{{ url_for('inventario.eliminar_producto', prod_id=p.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Desactivar producto (Soft Delete)?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Desactivar (Borrado Lógico)">
+                          <i class="bi bi-trash-fill"></i>
+                        </button>
+                      </form>
+                    {% else %}
+                      <form action="{{ url_for('inventario.reactivar_producto', prod_id=p.id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-outline-success btn-sm" title="Reactivar">
+                          <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOVIMIENTOS DE INVENTARIO -->
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-dark text-white py-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-journal-text me-2"></i>Historial de Movimientos de Inventario</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead class="bg-light fw-bold">
+            <tr>
+              <th class="ps-3">ID</th>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Fecha y Hora</th>
+              <th class="pe-3">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in movimientos %}
+              <tr>
+                <td class="ps-3 text-muted">#{{ m.id }}</td>
+                <td class="fw-bold">{{ m.producto_nombre }}</td>
+                <td>
+                  {% if m.tipo_movimiento == 'ENTRADA' %}
+                    <span class="badge bg-success">ENTRADA</span>
+                  {% elif m.tipo_movimiento == 'SALIDA' %}
+                    <span class="badge bg-danger">SALIDA</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">AJUSTE</span>
+                  {% endif %}
+                </td>
+                <td class="fw-bold">{{ m.cantidad }} u.</td>
+                <td class="small text-muted">{{ m.fecha }}</td>
+                <td class="pe-3 small">{{ m.descripcion }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL NUEVO PRODUCTO -->
+<div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Nuevo Producto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('inventario.nuevo_producto') }}" method="POST" enctype="multipart/form-data">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label for="nombre" class="form-label fw-bold">Nombre del Producto</label>
+            <input type="text" class="form-control" name="nombre" placeholder="Ej. Jugo Natural Mango 400ml" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_categoria" class="form-label fw-bold">Categoría</label>
+            <select class="form-select" name="id_categoria" required>
+              <option value="">Seleccione una categoría</option>
+              {% for c in categorias %}
+                <option value="{{ c.id }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label for="precio" class="form-label fw-bold">Precio ($ COP)</label>
+              <input type="number" step="100" class="form-control" name="precio" placeholder="3500" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label for="cantidad" class="form-label fw-bold">Stock Inicial</label>
+              <input type="number" class="form-control" name="cantidad" value="10" min="0" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="imagen" class="form-label fw-bold">Imagen del Producto (Opcional)</label>
+            <input type="file" class="form-control" name="imagen" accept="image/*">
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-laureles-primary fw-bold">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PRODUCTO -->
+<div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Producto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('inventario.editar_producto') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" id="edit_id" name="id">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label for="edit_nombre" class="form-label fw-bold">Nombre del Producto</label>
+            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_id_categoria" class="form-label fw-bold">Categoría</label>
+            <select class="form-select" id="edit_id_categoria" name="id_categoria" required>
+              {% for c in categorias %}
+                <option value="{{ c.id }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label for="edit_precio" class="form-label fw-bold">Precio ($ COP)</label>
+              <input type="number" step="100" class="form-control" id="edit_precio" name="precio" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label for="edit_cantidad" class="form-label fw-bold">Stock Actual</label>
+              <input type="number" class="form-control" id="edit_cantidad" name="cantidad" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="edit_imagen" class="form-label fw-bold">Cambiar Imagen (Opcional)</label>
+            <input type="file" class="form-control" name="imagen" accept="image/*">
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary fw-bold">Actualizar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUSTE DE STOCK -->
+<div class="modal fade" id="modalAjusteStock" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title fw-bold"><i class="bi bi-arrow-down-up me-2"></i>Ajuste Manual de Inventario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('inventario.ajuste_stock') }}" method="POST">
+        <input type="hidden" id="ajuste_id_producto" name="id_producto">
+        <div class="modal-body p-4">
+          <h6 class="fw-bold text-success mb-3" id="ajuste_nombre_producto"></h6>
+          <div class="mb-3">
+            <label for="tipo_movimiento" class="form-label fw-bold">Tipo de Movimiento</label>
+            <select class="form-select" name="tipo_movimiento" required>
+              <option value="ENTRADA">ENTRADA (Reabastecimiento de stock)</option>
+              <option value="SALIDA">SALIDA (Merma / Pérdida)</option>
+              <option value="AJUSTE">AJUSTE (Corrección de inventario)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="cantidad" class="form-label fw-bold">Cantidad de Unidades</label>
+            <input type="number" class="form-control" name="cantidad" min="1" value="5" required>
+          </div>
+          <div class="mb-3">
+            <label for="descripcion" class="form-label fw-bold">Motivo / Descripción</label>
+            <input type="text" class="form-control" name="descripcion" placeholder="Ej. Proveedor entregó lote semanal" required>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning fw-bold">Registrar Ajuste</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function cargarModalEditar(prod) {
+    document.getElementById('edit_id').value = prod.id;
+    document.getElementById('edit_nombre').value = prod.nombre;
+    document.getElementById('edit_id_categoria').value = prod.id_categoria;
+    document.getElementById('edit_precio').value = prod.precio;
+    document.getElementById('edit_cantidad').value = prod.cantidad;
+    const modal = new bootstrap.Modal(document.getElementById('modalEditarProducto'));
+    modal.show();
+  }
+
+  function cargarModalAjuste(id, nombre, stock) {
+    document.getElementById('ajuste_id_producto').value = id;
+    document.getElementById('ajuste_nombre_producto').textContent = nombre + ' (Stock Actual: ' + stock + ' u.)';
+    const modal = new bootstrap.Modal(document.getElementById('modalAjusteStock'));
+    modal.show();
+  }
+</script>
+{% endblock %}

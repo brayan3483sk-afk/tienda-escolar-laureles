@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes y Analítica{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold text-success mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Reportes y Analítica de Ventas</h2>
+      <p class="text-muted mb-0">Generados mediante **Pandas** y **Matplotlib** para la sustentación académica</p>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-success rounded-pill d-none d-md-inline-block">
+      <i class="bi bi-printer-fill me-1"></i>Imprimir Reporte
+    </button>
+  </div>
+
+  <!-- METRICAS RESUMEN PANDAS -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="bg-white p-3 rounded-4 shadow-sm border-start border-success border-4">
+        <span class="text-muted small fw-semibold">Ingresos Totales</span>
+        <h3 class="fw-extrabold text-success mb-0 currency-format">{{ total_ingresos }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white p-3 rounded-4 shadow-sm border-start border-warning border-4">
+        <span class="text-muted small fw-semibold">Unidades Vendidas</span>
+        <h3 class="fw-extrabold text-dark mb-0">{{ total_unidades }} u.</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white p-3 rounded-4 shadow-sm border-start border-info border-4">
+        <span class="text-muted small fw-semibold">Ticket Promedio</span>
+        <h3 class="fw-extrabold text-info mb-0 currency-format">{{ ticket_promedio }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="bg-white p-3 rounded-4 shadow-sm border-start border-danger border-4">
+        <span class="text-muted small fw-semibold">Categoría Líder</span>
+        <h4 class="fw-bold text-danger mb-0 text-truncate">{{ top_categoria }}</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS GENERADOS CON MATPLOTLIB -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+        <div class="card-header bg-white py-3 border-0">
+          <h5 class="fw-bold text-success mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Productos Más Vendidos</h5>
+        </div>
+        <div class="card-body text-center p-3">
+          <img src="{{ url_for('static', filename='charts/' + img_top) }}?v=1.1" alt="Top Productos" class="img-fluid rounded-3">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+        <div class="card-header bg-white py-3 border-0">
+          <h5 class="fw-bold text-success mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Ingresos por Categoría</h5>
+        </div>
+        <div class="card-body text-center p-3">
+          <img src="{{ url_for('static', filename='charts/' + img_cat) }}?v=1.1" alt="Categorías" class="img-fluid rounded-3">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-0">
+          <h5 class="fw-bold text-success mb-0"><i class="bi bi-donut-chart-fill me-2"></i>Comparativo por Método de Pago (EFECTIVO vs TRANSFERENCIA)</h5>
+        </div>
+        <div class="card-body text-center p-3">
+          <img src="{{ url_for('static', filename='charts/' + img_pago) }}?v=1.1" alt="Métodos de Pago" class="img-fluid rounded-3" style="max-height: 300px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA RESUMEN PANDAS -->
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-success text-white py-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-table me-2"></i>Resumen General de Desempeño por Producto (Procesado con Pandas)</h5>
+    </div>
+    <div class="card-body p-0">
+      {% if resumen_productos %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-success fw-bold">
+              <tr>
+                <th class="ps-4">Producto</th>
+                <th>Categoría</th>
+                <th class="text-center">Total Unidades Vendidas</th>
+                <th class="pe-4 text-end">Total Recaudado ($ COP)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in resumen_productos %}
+                <tr>
+                  <td class="ps-4 fw-bold text-dark">{{ row.producto_nombre }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ row.categoria_nombre }}</span></td>
+                  <td class="text-center fw-bold">{{ row.unidades }} u.</td>
+                  <td class="pe-4 text-end fw-extrabold text-success currency-format">{{ row.total_generado }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="p-4 text-center text-muted">Aún no se han completado pedidos entregados para procesar la analítica.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
